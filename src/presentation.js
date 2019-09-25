@@ -37,18 +37,24 @@ const theme = createTheme(
 
 const loopShader = `
   uniform mediump sampler2D user_input;
-  mediump ivec2 user_inputSize = ivec2(1, 1);
-  mediump ivec3 user_inputDim = ivec3(1, 1, 1);
+  mediump ivec2 user_inputSize = ivec2(35, 36);
+  mediump ivec3 user_inputDim = ivec3(5000, 1, 1);
   out vec4 data0;
   float kernelResult;
-  
-  /* The compiled Javascript function */
-  void kernel() { 
-    for (int user_i=0;(user_i<100000000);user_i++){
-      (user_i*10);
+
+  void kernel() {
+    float user_accumulator=0.0;
+
+    for (int user_i=1;(user_i<=5000);user_i++){
+      user_accumulator
+        += div_with_int_check(
+          getMemoryOptimized32(user_input, user_inputSize, user_inputDim, 0, 0, threadId.x)+1.0,
+          float(user_i)
+        );
     }
 
-    kernelResult = 0.0;return;
+    kernelResult = user_accumulator;
+    return;
   }
 
   void main(void) {
@@ -56,39 +62,32 @@ const loopShader = `
     threadId = indexTo3D(index, uOutputDim);
     kernel();
     data0[0] = kernelResult;
+
   }
 `;
 
-const nonLoopShader = `
-uniform mediump sampler2D user_input;
-mediump ivec2 user_inputSize = ivec2(2500, 2500);
-mediump ivec3 user_inputDim = ivec3(25000000, 1, 1);
-out vec4 data0;
-float kernelResult;
-
-/* The compiled Javascript function */
-void kernel() {
-  kernelResult = (
-    10.0* getMemoryOptimized32(user_input, user_inputSize, user_inputDim, 0, 0, threadId.x)
-  );
-  return;
-}
-
-void main(void) {
-  index = int(vTexCoord.s * float(uTexSize.x)) + int(vTexCoord.t * float(uTexSize.y)) * uTexSize.x;
-  threadId = indexTo3D(index, uOutputDim);
-  kernel();
-  data0[0] = kernelResult;
-
-}`;
-
 const kernelCode = `
-void kernel() {
-  kernelResult = (
-    10.0* getMemoryOptimized32(user_input, user_inputSize, user_inputDim, 0, 0, threadId.x)
-  );
-  return;
-}
+  void kernel() {
+    float user_accumulator=0.0;
+    
+    for (int user_i=1; user_i<=5000; user_i++) {
+      user_accumulator
+        += div_with_int_check(
+          getMemoryOptimized32(
+            user_input,
+            user_inputSize,
+            user_inputDim,
+            0,
+            0,
+            threadId.x
+          ) +1.0,
+          float(user_i)
+        );
+    }
+
+    kernelResult = user_accumulator;
+    return;
+  }
 `;
 
 const run = `
@@ -108,101 +107,115 @@ const readTexture = `
   }
 `;
 
+const jsLoop = `
+  for(let i=1; i<=5000; i++) {
+    let accumulator = 0;
+    for (let j = 1; j<=5000; j++) {
+      accumulator += j / i;
+    }
+    output[i] = accumulator;
+  }
+`;
+
+const gpuLoop = `
+  // Run this 5000x
+  gpuMultiply(input: Number[]) {
+    let accumulator = 0;
+    for (let i = 1; i <= 5000; i++) {
+      accumulator += (input[this.thread.x] + 1) / i;
+    }
+    return accumulator;
+  };
+`;
+
+const CodeTemplate = ({ title, src }) => (
+  <Slide>
+    <Heading size={1} fit caps lineHeight={1} textColor="secondary">
+      {title}
+    </Heading>
+    <CodePane className={styles.code} lang="js" source={src} />
+  </Slide>
+);
+
+const TitlePage = () => (
+  <Slide transition={["zoom"]} bgColor="primary">
+    <Heading size={1} fit caps lineHeight={1} textColor="secondary">
+      Unlocking the supercomputer in your browser
+    </Heading>
+    <Text margin="10px 0 0" textColor="tertiary" size={1} fit bold>
+      General-purpose GPU computing with GPU.js
+    </Text>
+  </Slide>
+);
+
+const Demo = () => (
+  <Slide>
+    <iframe
+      className={styles.demo}
+      title="demo"
+      src="https://lukeolney.me/javascript-gpgpu-demo/"
+    ></iframe>
+  </Slide>
+);
+
+const ShaderToy = ({ title, src }) => (
+  <Slide>
+    <Heading size={1} fit caps lineHeight={1} textColor="secondary">
+      {title}
+    </Heading>
+    <iframe
+      preload={true}
+      width="640"
+      height="360"
+      frameborder="0"
+      src={src}
+      title={title}
+      allowfullscreen
+    ></iframe>
+  </Slide>
+);
+
+const Applications = () => (
+  <Slide>
+    <Heading size={1} fit caps lineHeight={1} textColor="secondary">
+      Applications
+    </Heading>
+    <List>
+      <ListItem>TensorFlow.js? uses their own backend</ListItem>
+      <ListItem>
+        OpenCV? has a JS version, but compiled used emscripten
+      </ListItem>
+    </List>
+  </Slide>
+);
+
 export default class Presentation extends React.Component {
   render() {
     return (
       <Deck
         transition={["zoom", "slide"]}
         transitionDuration={500}
+        progress="bar"
         theme={theme}
       >
-        <Slide transition={["zoom"]} bgColor="primary">
+        <TitlePage />
+        <CodeTemplate title="Some code" src={jsLoop} />
+        <Demo />
+        <ShaderToy
+          title="How's it done?"
+          src="https://www.shadertoy.com/embed/ld2Gz3?gui=true&t=10&paused=true&muted=false"
+        />
+        <ShaderToy src="https://www.shadertoy.com/embed/XsX3RB?gui=true&t=10&paused=true&muted=false" />
+        <Slide>
           <Heading size={1} fit caps lineHeight={1} textColor="secondary">
-            Unlocking the supercomputer in your browser
+            Pipeline
           </Heading>
-          <Text margin="10px 0 0" textColor="tertiary" size={1} fit bold>
-            General-purpose GPU computing with GPU.js
-          </Text>
+          Compile shader -> load data as texture -> draw -> read texture as data
         </Slide>
-        <Slide>
-          <iframe
-            className={styles.demo}
-            title="demo"
-            src="https://lukeolney.me/javascript-gpgpu-demo/"
-          ></iframe>
-        </Slide>
-        <Slide>
-          <iframe
-            width="640"
-            height="360"
-            frameborder="0"
-            src="https://www.shadertoy.com/embed/ld2Gz3?gui=true&t=10&paused=true&muted=false"
-            title="shader-raytracer"
-            allowfullscreen
-          ></iframe>
-        </Slide>
-        <Slide>
-          <iframe
-            width="640"
-            height="360"
-            frameborder="0"
-            src="https://www.shadertoy.com/embed/XsX3RB?gui=true&t=10&paused=true&muted=false"
-            title="shader-procedural-generation"
-            allowfullscreen
-          ></iframe>
-        </Slide>
-        <Slide>
-          <CodePane className={styles.code} source={nonLoopShader} />
-        </Slide>
-        <Slide>
-          <CodePane className={styles.code} source={kernelCode} />
-        </Slide>
-        <Slide>
-          <CodePane className={styles.code} source={run} />
-        </Slide>
-        <Slide>
-          <CodePane className={styles.code} source={readTexture} />
-        </Slide>
-        <Slide transition={["fade"]} bgColor="tertiary">
-          <Heading size={6} textColor="primary" caps>
-            Typography
-          </Heading>
-          <Heading size={1} textColor="secondary">
-            Heading 1
-          </Heading>
-          <Heading size={2} textColor="secondary">
-            Heading 2
-          </Heading>
-          <Heading size={3} textColor="secondary">
-            Heading 3
-          </Heading>
-          <Heading size={4} textColor="secondary">
-            Heading 4
-          </Heading>
-          <Heading size={5} textColor="secondary">
-            Heading 5
-          </Heading>
-          <Text size={6} textColor="secondary">
-            Standard text
-          </Text>
-        </Slide>
-        <Slide transition={["fade"]} bgColor="primary" textColor="tertiary">
-          <Heading size={6} textColor="secondary" caps>
-            Standard List
-          </Heading>
-          <List>
-            <ListItem>Item 1</ListItem>
-            <ListItem>Item 2</ListItem>
-            <ListItem>Item 3</ListItem>
-            <ListItem>Item 4</ListItem>
-          </List>
-        </Slide>
-        <Slide transition={["fade"]} bgColor="secondary" textColor="primary">
-          <BlockQuote>
-            <Quote>Example Quote</Quote>
-            <Cite>Author</Cite>
-          </BlockQuote>
-        </Slide>
+        <CodeTemplate title="Compiled shader" src={kernelCode} />
+        <CodeTemplate title="Draw" src={run} />
+        <CodeTemplate title="Read texture as data" src={readTexture} />
+        <Applications />
       </Deck>
     );
   }
