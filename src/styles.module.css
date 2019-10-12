@@ -6,6 +6,20 @@
   height: 100vh;
 }
 
+.shaderToy {
+  width: 100vw;
+  height: 100vh;
+}
+
+.shaderToy iframe {
+  z-index: 1;
+  background: black;
+}
+
 div.code.code.code pre {
   font-size: 18px;
+}
+
+.multicodeWrapper:not(:last-child) {
+  margin-bottom: 10px;
 }

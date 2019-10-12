@@ -3,14 +3,12 @@ import React from "react";
 
 // Import Spectacle Core tags
 import {
-  BlockQuote,
-  Cite,
+  Appear,
   CodePane,
   Deck,
   Heading,
   ListItem,
   List,
-  Quote,
   Slide,
   Text
 } from "spectacle";
@@ -35,37 +33,6 @@ const theme = createTheme(
   }
 );
 
-const loopShader = `
-  uniform mediump sampler2D user_input;
-  mediump ivec2 user_inputSize = ivec2(35, 36);
-  mediump ivec3 user_inputDim = ivec3(5000, 1, 1);
-  out vec4 data0;
-  float kernelResult;
-
-  void kernel() {
-    float user_accumulator=0.0;
-
-    for (int user_i=1;(user_i<=5000);user_i++){
-      user_accumulator
-        += div_with_int_check(
-          getMemoryOptimized32(user_input, user_inputSize, user_inputDim, 0, 0, threadId.x)+1.0,
-          float(user_i)
-        );
-    }
-
-    kernelResult = user_accumulator;
-    return;
-  }
-
-  void main(void) {
-    index = int(vTexCoord.s * float(uTexSize.x)) + int(vTexCoord.t * float(uTexSize.y)) * uTexSize.x;
-    threadId = indexTo3D(index, uOutputDim);
-    kernel();
-    data0[0] = kernelResult;
-
-  }
-`;
-
 const kernelCode = `
   void kernel() {
     float user_accumulator=0.0;
@@ -83,6 +50,20 @@ const kernelCode = `
           ) +1.0,
           float(user_i)
         );
+    }
+
+    kernelResult = user_accumulator;
+    return;
+  }
+`;
+
+const kernelCodeCompressed = `
+  void kernel() {
+    float user_accumulator=0.0;
+    
+    for (int user_i=1; user_i<=5000; user_i++) {
+      user_accumulator
+        += user_input[threadId.x] + 1.0 / float(user_i);
     }
 
     kernelResult = user_accumulator;
@@ -130,16 +111,34 @@ const gpuLoop = `
 
 const CodeTemplate = ({ title, src }) => (
   <Slide>
-    <Heading size={1} fit caps lineHeight={1} textColor="secondary">
+    <Heading size={2} caps lineHeight={1} textColor="secondary">
       {title}
     </Heading>
     <CodePane className={styles.code} lang="js" source={src} />
   </Slide>
 );
 
+const CodeComparison = ({ title, srcs }) => (
+  <>
+    <Heading size={2} caps lineHeight={1} textColor="secondary">
+      {title}
+    </Heading>
+    {srcs.map(([label, src], order) => (
+      <Appear key={order} order={order}>
+        <div className={styles.multicodeWrapper}>
+          <Heading size={6} caps lineHeight={1} textColor="secondary">
+            {label}
+          </Heading>
+          <CodePane className={styles.code} lang="js" source={src} />
+        </div>
+      </Appear>
+    ))}
+  </>
+);
+
 const TitlePage = () => (
   <Slide transition={["zoom"]} bgColor="primary">
-    <Heading size={1} fit caps lineHeight={1} textColor="secondary">
+    <Heading size={3} lineHeight={1} textColor="secondary">
       Unlocking the supercomputer in your browser
     </Heading>
     <Text margin="10px 0 0" textColor="tertiary" size={1} fit bold>
@@ -159,15 +158,14 @@ const Demo = () => (
 );
 
 const ShaderToy = ({ title, src }) => (
-  <Slide>
+  <Slide className={styles.shaderToy}>
     <Heading size={1} fit caps lineHeight={1} textColor="secondary">
       {title}
     </Heading>
     <iframe
-      preload={true}
-      width="640"
-      height="360"
-      frameborder="0"
+      width="100%"
+      height="100%"
+      frameBorder="0"
       src={src}
       title={title}
       allowfullscreen
@@ -193,7 +191,7 @@ export default class Presentation extends React.Component {
   render() {
     return (
       <Deck
-        transition={["zoom", "slide"]}
+        transition={["slide"]}
         transitionDuration={500}
         progress="bar"
         theme={theme}
@@ -201,20 +199,34 @@ export default class Presentation extends React.Component {
         <TitlePage />
         <CodeTemplate title="Some code" src={jsLoop} />
         <Demo />
+        <Slide>
+          <CodeComparison
+            title="Code"
+            srcs={[["Vanilla Javascript", jsLoop], ["Uses the GPU", gpuLoop]]}
+          />
+        </Slide>
         <ShaderToy
           title="How's it done?"
-          src="https://www.shadertoy.com/embed/ld2Gz3?gui=true&t=10&paused=true&muted=false"
+          src="https://www.shadertoy.com/embed/ld2Gz3?gui=true&t=10&paused=false&muted=false"
         />
-        <ShaderToy src="https://www.shadertoy.com/embed/XsX3RB?gui=true&t=10&paused=true&muted=false" />
+        <ShaderToy src="https://www.shadertoy.com/embed/XsX3RB?gui=true&t=10&paused=false&muted=false" />
         <Slide>
           <Heading size={1} fit caps lineHeight={1} textColor="secondary">
             Pipeline
           </Heading>
           Compile shader -> load data as texture -> draw -> read texture as data
         </Slide>
-        <CodeTemplate title="Compiled shader" src={kernelCode} />
-        <CodeTemplate title="Draw" src={run} />
-        <CodeTemplate title="Read texture as data" src={readTexture} />
+        <Slide>
+          <CodeComparison
+            title="Compiled shader"
+            srcs={[
+              ["Orginal", gpuLoop],
+              ["Compiled (minus boilerplate)", kernelCodeCompressed]
+            ]}
+          />
+        </Slide>
+        <CodeTemplate title={'"Draw" your data'} src={run} />
+        <CodeTemplate title="Read the output texture" src={readTexture} />
         <Applications />
       </Deck>
     );
