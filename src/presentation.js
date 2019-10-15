@@ -10,7 +10,8 @@ import {
   ListItem,
   List,
   Slide,
-  Text
+  Text,
+  Image
 } from "spectacle";
 
 // Import theme
@@ -157,11 +158,16 @@ const Demo = () => (
   </Slide>
 );
 
-const ShaderToy = ({ title, src }) => (
+const ShaderToy = ({ title, text, src }) => (
   <Slide className={styles.shaderToy}>
-    <Heading size={1} fit caps lineHeight={1} textColor="secondary">
+    <Heading size={2} caps lineHeight={1} textColor="secondary">
       {title}
     </Heading>
+    {text && (
+      <Text margin="10px 0 0" textColor="tertiary" size={1} bold>
+        {text}
+      </Text>
+    )}
     <iframe
       width="100%"
       height="100%"
@@ -178,12 +184,21 @@ const Applications = () => (
     <Heading size={1} fit caps lineHeight={1} textColor="secondary">
       Applications
     </Heading>
+    <Text textColor="tertiary">GPU.js is a hackathon project</Text>
     <List>
       <ListItem>TensorFlow.js? uses their own backend</ListItem>
-      <ListItem>
-        OpenCV? has a JS version, but compiled used emscripten
-      </ListItem>
+      <ListItem>OpenCV? same thing</ListItem>
     </List>
+  </Slide>
+);
+
+const Piano = () => (
+  <Slide>
+    <iframe
+      className={styles.demo}
+      title="demo"
+      src="https://magenta.tensorflow.org/demos/performance_rnn/index.html#3|2,0,1,0,1,1,0,1,0,1,0,1|1,1,1,1,1,1,1,1,1,1,1,1|1,1,1,1,1,1,1,1,1,1,1,1|false"
+    ></iframe>
   </Slide>
 );
 
@@ -207,14 +222,18 @@ export default class Presentation extends React.Component {
         </Slide>
         <ShaderToy
           title="How's it done?"
+          text="Raw WebGL"
           src="https://www.shadertoy.com/embed/ld2Gz3?gui=true&t=10&paused=false&muted=false"
         />
-        <ShaderToy src="https://www.shadertoy.com/embed/XsX3RB?gui=true&t=10&paused=false&muted=false" />
         <Slide>
           <Heading size={1} fit caps lineHeight={1} textColor="secondary">
             Pipeline
           </Heading>
-          Compile shader -> load data as texture -> draw -> read texture as data
+          <Text>
+            Compile shader -> load data as texture -> draw -> read texture as
+            data
+          </Text>
+          <Image src="pipeline-diagram.001.png"></Image>
         </Slide>
         <Slide>
           <CodeComparison
@@ -228,6 +247,12 @@ export default class Presentation extends React.Component {
         <CodeTemplate title={'"Draw" your data'} src={run} />
         <CodeTemplate title="Read the output texture" src={readTexture} />
         <Applications />
+        <Piano />
+        <ShaderToy
+          title="fin"
+          text="Questions?"
+          src="https://www.shadertoy.com/embed/XsX3RB?gui=true&t=10&paused=false&muted=false"
+        />
       </Deck>
     );
   }
