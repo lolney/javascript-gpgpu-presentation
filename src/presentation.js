@@ -64,7 +64,7 @@ const kernelCodeCompressed = `
     
     for (int user_i=1; user_i<=5000; user_i++) {
       user_accumulator
-        += user_input[threadId.x] + 1.0 / float(user_i);
+        += get(user_input, threadId.x) + 1.0 / float(user_i);
     }
 
     kernelResult = user_accumulator;
@@ -116,6 +116,16 @@ const CodeTemplate = ({ title, src }) => (
       {title}
     </Heading>
     <CodePane className={styles.code} lang="js" source={src} />
+  </Slide>
+);
+
+const CodeWithImage = ({ title, src, img }) => (
+  <Slide>
+    <Heading size={2} caps lineHeight={1} textColor="secondary">
+      {title}
+    </Heading>
+    <CodePane className={styles.code} lang="js" source={src} />
+    <Image src={img}></Image>
   </Slide>
 );
 
@@ -235,6 +245,11 @@ export default class Presentation extends React.Component {
           </Text>
           <Image src="pipeline-diagram.001.png"></Image>
         </Slide>
+        <CodeWithImage
+          title={'"Draw" your data'}
+          src={run}
+          img={"drawing.png"}
+        />
         <Slide>
           <CodeComparison
             title="Compiled shader"
@@ -244,8 +259,11 @@ export default class Presentation extends React.Component {
             ]}
           />
         </Slide>
-        <CodeTemplate title={'"Draw" your data'} src={run} />
-        <CodeTemplate title="Read the output texture" src={readTexture} />
+        <CodeWithImage
+          title="Read the output texture"
+          src={readTexture}
+          img={"output.png"}
+        />
         <Applications />
         <Piano />
         <ShaderToy
