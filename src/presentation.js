@@ -100,7 +100,6 @@ const jsLoop = `
 `;
 
 const gpuLoop = `
-  // Run this 5000x
   gpuMultiply(input: Number[]) {
     let accumulator = 0;
     for (let i = 1; i <= 5000; i++) {
@@ -108,6 +107,13 @@ const gpuLoop = `
     }
     return accumulator;
   };
+`;
+
+const gpuLoopAnnotated = `
+  ${gpuLoop}
+
+  // Then use this as the input:
+  const input = new Array(5000).fill(0).map(() => Math.random());
 `;
 
 const CodeTemplate = ({ title, src }) => (
@@ -227,7 +233,7 @@ export default class Presentation extends React.Component {
         <Slide>
           <CodeComparison
             title="Code"
-            srcs={[["Vanilla Javascript", jsLoop], ["Uses the GPU", gpuLoop]]}
+            srcs={[["Vanilla Javascript", jsLoop], ["Uses the GPU", gpuLoopAnnotated]]}
           />
         </Slide>
         <ShaderToy
