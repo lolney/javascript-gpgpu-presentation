@@ -1,15 +1,15 @@
 {
-  "main.css": "/static/css/main.be44d0fc.chunk.css",
-  "main.js": "/static/js/main.dffa2b7d.chunk.js",
-  "main.js.map": "/static/js/main.dffa2b7d.chunk.js.map",
-  "static/css/1.9d12d145.chunk.css": "/static/css/1.9d12d145.chunk.css",
-  "static/js/1.e6920397.chunk.js": "/static/js/1.e6920397.chunk.js",
-  "static/js/1.e6920397.chunk.js.map": "/static/js/1.e6920397.chunk.js.map",
-  "runtime~main.js": "/static/js/runtime~main.229c360f.js",
-  "runtime~main.js.map": "/static/js/runtime~main.229c360f.js.map",
-  "static/css/main.be44d0fc.chunk.css.map": "/static/css/main.be44d0fc.chunk.css.map",
-  "static/css/1.9d12d145.chunk.css.map": "/static/css/1.9d12d145.chunk.css.map",
-  "index.html": "/index.html",
-  "precache-manifest.22b533ef3dcebcba83eefd5d82d3facc.js": "/precache-manifest.22b533ef3dcebcba83eefd5d82d3facc.js",
-  "service-worker.js": "/service-worker.js"
+  "main.css": "/javascript-gpgpu-presentation/static/css/main.be44d0fc.chunk.css",
+  "main.js": "/javascript-gpgpu-presentation/static/js/main.dffa2b7d.chunk.js",
+  "main.js.map": "/javascript-gpgpu-presentation/static/js/main.dffa2b7d.chunk.js.map",
+  "static/css/1.9d12d145.chunk.css": "/javascript-gpgpu-presentation/static/css/1.9d12d145.chunk.css",
+  "static/js/1.e6920397.chunk.js": "/javascript-gpgpu-presentation/static/js/1.e6920397.chunk.js",
+  "static/js/1.e6920397.chunk.js.map": "/javascript-gpgpu-presentation/static/js/1.e6920397.chunk.js.map",
+  "runtime~main.js": "/javascript-gpgpu-presentation/static/js/runtime~main.a5ea5cbb.js",
+  "runtime~main.js.map": "/javascript-gpgpu-presentation/static/js/runtime~main.a5ea5cbb.js.map",
+  "static/css/main.be44d0fc.chunk.css.map": "/javascript-gpgpu-presentation/static/css/main.be44d0fc.chunk.css.map",
+  "static/css/1.9d12d145.chunk.css.map": "/javascript-gpgpu-presentation/static/css/1.9d12d145.chunk.css.map",
+  "index.html": "/javascript-gpgpu-presentation/index.html",
+  "precache-manifest.da4e273fd4dfa0e419f1ad436379b241.js": "/javascript-gpgpu-presentation/precache-manifest.da4e273fd4dfa0e419f1ad436379b241.js",
+  "service-worker.js": "/javascript-gpgpu-presentation/service-worker.js"
 }
