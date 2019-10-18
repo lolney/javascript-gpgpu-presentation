@@ -34,30 +34,6 @@ const theme = createTheme(
   }
 );
 
-const kernelCode = `
-  void kernel() {
-    float user_accumulator=0.0;
-    
-    for (int user_i=1; user_i<=5000; user_i++) {
-      user_accumulator
-        += div_with_int_check(
-          getMemoryOptimized32(
-            user_input,
-            user_inputSize,
-            user_inputDim,
-            0,
-            0,
-            threadId.x
-          ) +1.0,
-          float(user_i)
-        );
-    }
-
-    kernelResult = user_accumulator;
-    return;
-  }
-`;
-
 const kernelCodeCompressed = `
   void kernel() {
     float user_accumulator=0.0;
@@ -111,7 +87,6 @@ const gpuLoop = `
 
 const gpuLoopAnnotated = `
   ${gpuLoop}
-
   // Then use this as the input:
   const input = new Array(5000).fill(0).map(() => Math.random());
 `;
@@ -233,7 +208,10 @@ export default class Presentation extends React.Component {
         <Slide>
           <CodeComparison
             title="Code"
-            srcs={[["Vanilla Javascript", jsLoop], ["Uses the GPU", gpuLoopAnnotated]]}
+            srcs={[
+              ["Vanilla Javascript", jsLoop],
+              ["Uses the GPU", gpuLoopAnnotated]
+            ]}
           />
         </Slide>
         <ShaderToy
